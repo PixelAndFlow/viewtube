@@ -4,6 +4,9 @@
   "description": "This folder contains the entire Node.js/Express backend. Everything here runs on the server (your local machine during development). It is responsible for handling API requests from the React frontend, querying the database, and returning data as JSON.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "seed": "node db/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
