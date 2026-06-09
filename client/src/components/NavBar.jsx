@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -11,6 +11,12 @@ const MenuIcon = () => (
 const SearchIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
     <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+  </svg>
+);
+
+const ArrowBackIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
   </svg>
 );
 
@@ -28,17 +34,48 @@ const MoonIcon = () => (
 
 export default function NavBar() {
   const [query, setQuery] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { dark, toggleTheme } = useTheme();
+  const mobileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (mobileSearchOpen) mobileInputRef.current?.focus();
+  }, [mobileSearchOpen]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     const q = query.trim();
-    if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+    if (q) {
+      navigate(`/search?q=${encodeURIComponent(q)}`);
+      setMobileSearchOpen(false);
+    }
   };
 
   return (
     <header className="navbar">
+      {/* Full-width search overlay shown on mobile when search is open */}
+      <div className={`mobile-search-overlay${mobileSearchOpen ? ' open' : ''}`}>
+        <button
+          className="nav-icon-btn"
+          type="button"
+          onClick={() => setMobileSearchOpen(false)}
+          aria-label="Close search"
+        >
+          <ArrowBackIcon />
+        </button>
+        <form className="mobile-search-form" onSubmit={handleSearch}>
+          <input
+            ref={mobileInputRef}
+            className="mobile-search-input"
+            type="text"
+            placeholder="Search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </form>
+      </div>
+
       <div className="navbar-left">
         <button className="nav-icon-btn" aria-label="Menu">
           <MenuIcon />
@@ -63,6 +100,13 @@ export default function NavBar() {
       </form>
 
       <div className="navbar-right">
+        <button
+          className="nav-icon-btn nav-search-mobile-btn"
+          onClick={() => setMobileSearchOpen(true)}
+          aria-label="Search"
+        >
+          <SearchIcon />
+        </button>
         <button
           className="nav-icon-btn"
           onClick={toggleTheme}

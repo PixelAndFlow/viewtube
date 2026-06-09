@@ -14,22 +14,42 @@ const StarIcon = () => (
 
 export default function Sidebar() {
   return (
-    <aside className="sidebar">
-      <NavLink
-        to="/"
-        end
-        className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
-      >
-        <span className="sidebar-icon"><HomeIcon /></span>
-        <span className="sidebar-label">Home</span>
-      </NavLink>
-      <NavLink
-        to="/starred"
-        className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
-      >
-        <span className="sidebar-icon"><StarIcon /></span>
-        <span className="sidebar-label">Starred</span>
-      </NavLink>
-    </aside>
+    <>
+      <aside className="sidebar">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
+        >
+          <span className="sidebar-icon"><HomeIcon /></span>
+          <span className="sidebar-label">Home</span>
+        </NavLink>
+        <NavLink
+          to="/starred"
+          className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
+        >
+          <span className="sidebar-icon"><StarIcon /></span>
+          <span className="sidebar-label">Starred</span>
+        </NavLink>
+      </aside>
+
+      <nav className="bottom-nav">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
+        >
+          <HomeIcon />
+          <span>Home</span>
+        </NavLink>
+        <NavLink
+          to="/starred"
+          className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
+        >
+          <StarIcon />
+          <span>Starred</span>
+        </NavLink>
+      </nav>
+    </>
   );
 }

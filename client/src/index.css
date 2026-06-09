@@ -652,3 +652,155 @@ body {
   font-size: 12px;
   color: var(--text-secondary);
 }
+
+/* ── Mobile search overlay ───────────────────────────────────── */
+.nav-search-mobile-btn {
+  display: none;
+}
+
+.mobile-search-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  align-items: center;
+  padding: 0 4px;
+  gap: 4px;
+  z-index: 10;
+}
+
+.mobile-search-overlay.open {
+  display: flex;
+}
+
+.mobile-search-form {
+  flex: 1;
+  display: flex;
+}
+
+.mobile-search-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--input-border);
+  border-radius: 40px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.mobile-search-input:focus {
+  border-color: #1c62b9;
+  box-shadow: inset 0 0 0 1px #1c62b9;
+}
+
+/* ── Bottom navigation (mobile only) ────────────────────────── */
+.bottom-nav {
+  display: none;
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 0;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.bottom-nav-item.active {
+  color: var(--text-primary);
+}
+
+/* ── Breakpoint: tablet (≤ 1024px) ──────────────────────────── */
+@media (max-width: 1024px) {
+  .watch-suggestions-section {
+    width: 300px;
+  }
+}
+
+/* ── Breakpoint: mobile (≤ 768px) ───────────────────────────── */
+@media (max-width: 768px) {
+  /* Desktop sidebar hidden; bottom nav takes over */
+  .sidebar {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+  }
+
+  /* Remove sidebar indent; pad bottom for bottom nav */
+  .app-content {
+    margin-left: 0;
+    padding-bottom: 60px;
+  }
+
+  /* Hide desktop search bar; show icon */
+  .navbar-search-form {
+    display: none;
+  }
+
+  .nav-search-mobile-btn {
+    display: flex;
+  }
+
+  /* Compact navbar edges */
+  .navbar-left {
+    min-width: unset;
+  }
+
+  .navbar-right {
+    min-width: unset;
+    gap: 0;
+  }
+
+  /* Watch page: stack player above suggestions */
+  .watch-container {
+    flex-direction: column;
+  }
+
+  .watch-suggestions-section {
+    width: 100%;
+  }
+
+  /* Tighter page padding */
+  .main-content {
+    padding: 16px;
+  }
+}
+
+/* ── Breakpoint: small phone (≤ 480px) ──────────────────────── */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 12px;
+  }
+
+  /* Compact suggestion thumbnails */
+  .suggestion-thumb-wrap {
+    width: 130px;
+    height: 73px;
+  }
+
+  /* Filter chip row: smaller chips */
+  .filter-chip {
+    font-size: 13px;
+    padding: 5px 12px;
+  }
+}
