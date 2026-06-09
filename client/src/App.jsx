@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { StarredProvider } from './context/StarredContext';
+import { ThemeProvider } from './context/ThemeContext';
 import NavBar from './components/NavBar';
+import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
 import WatchPage from './pages/WatchPage';
 import SearchResults from './pages/SearchResults';
@@ -10,15 +12,22 @@ import './App.css';
 export default function App() {
   return (
     <BrowserRouter>
-      <StarredProvider>
-        <NavBar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/watch/:id" element={<WatchPage />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/starred" element={<StarredPage />} />
-        </Routes>
-      </StarredProvider>
+      <ThemeProvider>
+        <StarredProvider>
+          <NavBar />
+          <div className="app-body">
+            <Sidebar />
+            <div className="app-content">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/watch/:id" element={<WatchPage />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/starred" element={<StarredPage />} />
+              </Routes>
+            </div>
+          </div>
+        </StarredProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
