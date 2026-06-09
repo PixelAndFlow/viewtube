@@ -1,38 +1,16 @@
-# client/
+# React + Vite
 
-This folder contains the entire React frontend. Everything here runs in
-the user's browser. It is responsible for all the UI — what the user sees,
-clicks, and interacts with.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## How it works
+Currently, two official plugins are available:
 
-The React app is a single-page application. When the user opens the app,
-the browser loads one HTML file (public/index.html) and React takes over
-from there — rendering pages, handling navigation, and fetching data from
-the backend API without ever reloading the full page.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Folder contents
+## React Compiler
 
-  public/           Static files served directly by the browser
-  src/              All React source code
-  src/components/   Reusable UI pieces used across multiple pages
-  src/pages/        One file per full page in the app
-  src/App.jsx       Defines all routes and renders the NavBar
-  src/index.js      Entry point — mounts the React app into index.html
-  package.json      Frontend dependencies and run scripts
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Key commands (run from inside the client/ folder)
+## Expanding the ESLint configuration
 
-  npm install       Install all dependencies listed in package.json
-  npm run dev       Start the development server at http://localhost:5173
-  npm run build     Build the app for production (output goes to dist/)
-
-## How the frontend talks to the backend
-
-The React app makes HTTP requests to the Express backend running on port 3001.
-For example, when the homepage loads it calls:
-
-  GET http://localhost:3001/api/videos
-
-The backend returns a JSON array of video objects, and React renders them
-as video cards on the page.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
