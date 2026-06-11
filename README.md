@@ -1,5 +1,5 @@
 # ViewTube
-- Mofazzal Hossain — Pair Programmer
+- Marc Delsoin & Mofazzal Hossain — Pair Programmers
 A full-stack YouTube replica built as a web development assignment. Supports homepage video browsing, channel filtering, search, video playback via YouTube embed, starring/bookmarking videos, dark mode, and a fully responsive mobile layout.
 
 ## Features
