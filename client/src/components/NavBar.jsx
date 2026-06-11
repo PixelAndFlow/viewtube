@@ -35,26 +35,70 @@ const MoonIcon = () => (
 export default function NavBar() {
   const [query, setQuery] = useState('');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [allVideos, setAllVideos] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
   const { dark, toggleTheme } = useTheme();
   const mobileInputRef = useRef(null);
+  const searchWrapRef = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/videos')
+      .then((res) => res.json())
+      .then(setAllVideos)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (mobileSearchOpen) mobileInputRef.current?.focus();
   }, [mobileSearchOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const trimmed = query.trim().toLowerCase();
+  const suggestions = trimmed
+    ? allVideos
+        .filter(
+          (v) =>
+            v.title.toLowerCase().includes(trimmed) ||
+            v.channel_name.toLowerCase().includes(trimmed)
+        )
+        .slice(0, 8)
+    : [];
+
+  const runSearch = (q) => {
+    const text = q.trim();
+    if (!text) return;
+    navigate(`/search?q=${encodeURIComponent(text)}`);
+    setShowSuggestions(false);
+    setMobileSearchOpen(false);
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
-    const q = query.trim();
-    if (q) {
-      navigate(`/search?q=${encodeURIComponent(q)}`);
-      setMobileSearchOpen(false);
-    }
+    runSearch(query);
+  };
+
+  const handleSuggestionClick = (text) => {
+    setQuery(text);
+    runSearch(text);
+  };
+
+  const handleQueryChange = (value) => {
+    setQuery(value);
+    setShowSuggestions(value.trim().length > 0);
   };
 
   return (
     <header className="navbar">
-      {/* Full-width search overlay shown on mobile when search is open */}
       <div className={`mobile-search-overlay${mobileSearchOpen ? ' open' : ''}`}>
         <button
           className="nav-icon-btn"
@@ -71,7 +115,7 @@ export default function NavBar() {
             type="text"
             placeholder="Search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
           />
         </form>
       </div>
@@ -86,20 +130,40 @@ export default function NavBar() {
         </Link>
       </div>
 
-      <form className="navbar-search-form" onSubmit={handleSearch}>
-        <input
-          className="navbar-search-input"
-          type="text"
-          placeholder="Search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button type="submit" className="navbar-search-btn" aria-label="Search">
-          <SearchIcon />
-        </button>
-      </form>
+      <div className="navbar-search-wrap" ref={searchWrapRef}>
+        <form className="navbar-search-form" onSubmit={handleSearch}>
+          <input
+            className="navbar-search-input"
+            type="text"
+            placeholder="Search"
+            value={query}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            onFocus={() => trimmed && setShowSuggestions(true)}
+          />
+          <button type="submit" className="navbar-search-btn" aria-label="Search">
+            <SearchIcon />
+          </button>
+        </form>
+        {showSuggestions && suggestions.length > 0 && (
+          <ul className="search-suggestions">
+            {suggestions.map((v) => (
+              <li key={v.id}>
+                <button
+                  type="button"
+                  className="search-suggestion-item"
+                  onClick={() => handleSuggestionClick(v.title)}
+                >
+                  <span className="search-suggestion-title">{v.title}</span>
+                  <span className="search-suggestion-channel">{v.channel_name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="navbar-right">
+        <Link to="/trending" className="navbar-link">Trending</Link>
         <button
           className="nav-icon-btn nav-search-mobile-btn"
           onClick={() => setMobileSearchOpen(true)}

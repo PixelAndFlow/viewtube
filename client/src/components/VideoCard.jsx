@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useStarred } from '../context/StarredContext';
+import { getProgressPercent } from '../utils/watchProgress';
 
 const CHANNEL_COLORS = {
   'VEVO Music':    '#c00',
@@ -13,11 +14,15 @@ const CHANNEL_COLORS = {
   'World Kitchen': '#5d4037',
 };
 
-function formatViews(count) {
-  if (count >= 1e9) return `${(count / 1e9).toFixed(1)}B views`;
-  if (count >= 1e6) return `${(count / 1e6).toFixed(1)}M views`;
-  if (count >= 1e3) return `${(count / 1e3).toFixed(1)}K views`;
-  return `${count} views`;
+function formatDuration(duration) {
+  if (!duration) return '0:00';
+  const parts = String(duration).split(':').map(Number);
+  if (parts.length === 3) {
+    const [hours, minutes, seconds] = parts;
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  const [minutes, seconds] = parts;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 function formatRelativeDate(dateStr) {
@@ -32,19 +37,39 @@ function formatRelativeDate(dateStr) {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
-export default function VideoCard({ video }) {
+export default function VideoCard({ video, startTime, onCardClick }) {
   const navigate = useNavigate();
   const { isStarred, toggleStar } = useStarred();
   const starred = isStarred(video.id);
   const avatarColor = CHANNEL_COLORS[video.channel_name] || '#606060';
+  const progressPercent = getProgressPercent(video.id);
+
+  function formatViewCount(count) {
+    if (count >= 1e9) return `${(count / 1e9).toFixed(1)}B views`;
+    if (count >= 1e6) return `${(count / 1e6).toFixed(1)}M views`;
+    if (count >= 1e3) return `${(count / 1e3).toFixed(1)}K views`;
+    return `${count} views`;
+  }
 
   const handleStarClick = (e) => {
     e.stopPropagation();
     toggleStar(video.id);
   };
 
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick();
+      return;
+    }
+    if (startTime != null) {
+      navigate(`/watch/${video.id}`, { state: { startTime } });
+      return;
+    }
+    navigate(`/watch/${video.id}`);
+  };
+
   return (
-    <div className="video-card" onClick={() => navigate(`/watch/${video.id}`)}>
+    <div className="video-card" onClick={handleCardClick}>
       <div className="video-card-thumb-wrap">
         <img
           className="video-card-thumb"
@@ -52,7 +77,15 @@ export default function VideoCard({ video }) {
           alt={video.title}
           loading="lazy"
         />
-        <span className="video-card-duration">{video.duration}</span>
+        {progressPercent > 0 && progressPercent < 95 && (
+          <div className="video-card-progress">
+            <div
+              className="video-card-progress-bar"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        )}
+        <span className="video-card-duration">{formatDuration(video.duration)}</span>
         <button
           className={`video-card-star${starred ? ' starred' : ''}`}
           onClick={handleStarClick}
@@ -71,9 +104,10 @@ export default function VideoCard({ video }) {
         </div>
         <div className="video-card-meta-col">
           <p className="video-card-title">{video.title}</p>
+          <p className="video-card-views">{formatViewCount(video.view_count)}</p>
           <p className="video-card-channel">{video.channel_name}</p>
           <p className="video-card-stats">
-            {formatViews(video.view_count)} · {formatRelativeDate(video.upload_date)}
+            {formatRelativeDate(video.upload_date)}
           </p>
         </div>
       </div>
