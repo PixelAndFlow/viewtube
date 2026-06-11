@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import VideoPlayer from '../components/VideoPlayer';
+import RelatedVideos from '../components/RelatedVideos';
 import { useStarred } from '../context/StarredContext';
+import { isSubscribed, toggleSubscription } from '../utils/subscriptions';
+import { getChannelSubscriberCount } from '../utils/channels';
 
 const CHANNEL_COLORS = {
   'VEVO Music':    '#c00',
@@ -36,11 +39,16 @@ function formatRelativeDate(dateStr) {
 
 export default function WatchPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const { isStarred, toggleStar } = useStarred();
   const [video, setVideo] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
+  const [relatedVideos, setRelatedVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [subscribed, setSubscribed] = useState(false);
+  const [miniPlayer, setMiniPlayer] = useState(false);
+  const playerAnchorRef = useRef(null);
+
+  const startTime = location.state?.startTime ?? 0;
 
   useEffect(() => {
     setLoading(true);
@@ -50,11 +58,38 @@ export default function WatchPage() {
     ])
       .then(([videoData, allVideos]) => {
         setVideo(videoData);
-        setSuggestions(allVideos.filter(v => v.id !== videoData.id).slice(0, 12));
+        setRelatedVideos(
+          allVideos.filter(
+            (v) => v.channel_name === videoData.channel_name && v.id !== videoData.id
+          )
+        );
+        setSubscribed(isSubscribed(videoData.channel_name));
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const anchor = playerAnchorRef.current;
+      if (!anchor) return;
+      setMiniPlayer(anchor.getBoundingClientRect().bottom < 80);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [video]);
+
+  const handleExpandMini = () => {
+    setMiniPlayer(false);
+    playerAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSubscribe = () => {
+    if (!video) return;
+    toggleSubscription(video.channel_name);
+    setSubscribed(isSubscribed(video.channel_name));
+  };
 
   if (loading) return <main className="main-content"><p className="status-message">Loading...</p></main>;
   if (!video || video.error) return <main className="main-content"><p className="status-message error">Video not found.</p></main>;
@@ -66,7 +101,16 @@ export default function WatchPage() {
     <main className="main-content">
       <div className="watch-container">
         <section className="watch-player-section">
-          <VideoPlayer videoId={video.video_url} />
+          <div ref={playerAnchorRef} className="watch-player-anchor">
+            {miniPlayer && <div className="watch-player-placeholder" aria-hidden="true" />}
+            <VideoPlayer
+              videoId={video.video_url}
+              videoDbId={video.id}
+              startTime={startTime}
+              isMini={miniPlayer}
+              onExpandMini={handleExpandMini}
+            />
+          </div>
 
           <div className="watch-video-info">
             <h1 className="watch-title">{video.title}</h1>
@@ -77,8 +121,15 @@ export default function WatchPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <p className="watch-channel-name">{video.channel_name}</p>
-                <p className="watch-channel-subs">{formatViews(video.view_count)} total views</p>
+                <p className="watch-channel-subs">{getChannelSubscriberCount(video.channel_name)}</p>
               </div>
+              <button
+                type="button"
+                className={`subscribe-btn${subscribed ? ' subscribed' : ''}`}
+                onClick={handleSubscribe}
+              >
+                {subscribed ? 'Subscribed' : 'Subscribe'}
+              </button>
             </div>
 
             <div className="watch-actions-row">
@@ -96,26 +147,7 @@ export default function WatchPage() {
           </div>
         </section>
 
-        <aside className="watch-suggestions-section">
-          <h2 className="suggestions-title">Up next</h2>
-          {suggestions.map(v => (
-            <div
-              key={v.id}
-              className="suggestion-card"
-              onClick={() => navigate(`/watch/${v.id}`)}
-            >
-              <div className="suggestion-thumb-wrap">
-                <img src={v.thumbnail_url} alt={v.title} loading="lazy" />
-                <span className="suggestion-duration">{v.duration}</span>
-              </div>
-              <div className="suggestion-info">
-                <p className="suggestion-title">{v.title}</p>
-                <p className="suggestion-channel">{v.channel_name}</p>
-                <p className="suggestion-views">{formatViews(v.view_count)}</p>
-              </div>
-            </div>
-          ))}
-        </aside>
+        <RelatedVideos videos={relatedVideos} />
       </div>
     </main>
   );

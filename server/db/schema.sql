@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS videos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   channel_name TEXT NOT NULL,
+  category TEXT NOT NULL,
   upload_date TEXT NOT NULL,
   thumbnail_url TEXT NOT NULL,
   video_url TEXT NOT NULL,

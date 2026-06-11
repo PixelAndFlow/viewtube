@@ -3,11 +3,14 @@ const path = require('path');
 
 const db = new Database(path.join(__dirname, 'viewtube.db'));
 
+db.exec('DROP TABLE IF EXISTS videos;');
+
 db.exec(`
-  CREATE TABLE IF NOT EXISTS videos (
+  CREATE TABLE videos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     channel_name TEXT NOT NULL,
+    category TEXT NOT NULL,
     upload_date TEXT NOT NULL,
     thumbnail_url TEXT NOT NULL,
     video_url TEXT NOT NULL,
@@ -16,8 +19,17 @@ db.exec(`
   );
 `);
 
-db.exec('DELETE FROM videos;');
-db.exec("DELETE FROM sqlite_sequence WHERE name='videos';");
+const CHANNEL_CATEGORY = {
+  'VEVO Music': 'Music',
+  'Retro Hits': 'Music',
+  'Pop Legends': 'Music',
+  'Rock Classics': 'Sports',
+  'Urban Beats': 'Music',
+  'TED Talks': 'Education',
+  'Science & Space': 'News',
+  'Tech Today': 'Gaming',
+  'World Kitchen': 'Education',
+};
 
 const rawVideos = [
   // ── VEVO Music ───────────────────────────────────────────────
@@ -110,12 +122,13 @@ const rawVideos = [
 
 const videos = rawVideos.map(v => ({
   ...v,
+  category: CHANNEL_CATEGORY[v.channel_name],
   thumbnail_url: `https://img.youtube.com/vi/${v.video_url}/hqdefault.jpg`,
 }));
 
 const insert = db.prepare(`
-  INSERT INTO videos (title, channel_name, upload_date, thumbnail_url, video_url, view_count, duration)
-  VALUES (@title, @channel_name, @upload_date, @thumbnail_url, @video_url, @view_count, @duration)
+  INSERT INTO videos (title, channel_name, category, upload_date, thumbnail_url, video_url, view_count, duration)
+  VALUES (@title, @channel_name, @category, @upload_date, @thumbnail_url, @video_url, @view_count, @duration)
 `);
 
 const insertAll = db.transaction((rows) => {
