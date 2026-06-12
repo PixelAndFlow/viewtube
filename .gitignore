@@ -35,6 +35,9 @@ node_modules/
 *.sqlite
 *.sqlite3
 *.db
+db/*.db
+db/*.sqlite
+/tmp/viewtube.db
 
 # React build output
 client/dist/
