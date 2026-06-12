@@ -3,13 +3,29 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const videosRouter = require('./routes/videos');
-const searchRouter = require('./routes/search');
 
 const dbPath = path.join(__dirname, 'db/viewtube.db');
-if (!fs.existsSync(dbPath)) {
-  require('./db/seed');
+
+function ensureDatabase() {
+  if (!fs.existsSync(dbPath)) {
+    require('./db/seed');
+    return;
+  }
+  try {
+    const Database = require('better-sqlite3');
+    const db = new Database(dbPath);
+    const table = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='videos'").get();
+    db.close();
+    if (!table) require('./db/seed');
+  } catch {
+    require('./db/seed');
+  }
 }
+
+ensureDatabase();
+
+const videosRouter = require('./routes/videos');
+const searchRouter = require('./routes/search');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
