@@ -1,6 +1,6 @@
 # ViewTube — Project Context
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 A full-stack YouTube replica built as a demo/portfolio project. The app lets users browse, search, and watch videos using YouTube embeds. All user state (starred, history, progress, subscriptions) lives in the browser. The database holds only the video catalogue.
 
@@ -25,6 +25,7 @@ A full-stack YouTube replica built as a demo/portfolio project. The app lets use
 viewtube/
 ├── client/          React frontend (Vite)
 ├── server/          Express backend + SQLite
+├── render.yaml      Render deployment blueprint
 ├── context.md       This file
 └── README.md        Setup instructions
 ```
@@ -95,6 +96,27 @@ Open http://localhost:5173 in your browser.
 
 ---
 
+## Render Deployment
+
+The app is configured to deploy to Render's free tier as a single web service (Express serves both the API and the built React app).
+
+**Key files:**
+- `render.yaml` — Render blueprint in the project root
+- `server/.env.example` — template for local `.env`
+
+**How it works on Render:**
+- Build: installs deps and runs `vite build` in `client/`
+- Start: `node db/seed.js && node index.js` — seeds the DB then starts Express
+- `NODE_ENV=production` — enables static file serving and open CORS
+- `DB_PATH=/tmp/viewtube.db` — writes SQLite to `/tmp/` (the only writable path on Render's free tier)
+- Express serves `client/dist` as static files and catches all non-API routes with `/{*splat}` → `index.html`
+
+**Important:** The database is ephemeral on Render's free tier — it resets on every redeploy. The auto-seed on startup handles this automatically.
+
+**Local dev is unchanged** — `npm run dev` in both `client/` and `server/` still works as before. `DB_PATH` falls back to `server/db/viewtube.db` when the env var is not set.
+
+---
+
 ## Key Design Decisions
 
 - No user accounts — all personalisation is browser-local
@@ -102,6 +124,7 @@ Open http://localhost:5173 in your browser.
 - Dark mode applied via `data-theme` attribute on `<html>` using CSS custom properties — zero runtime cost, no flash
 - Watch progress cleared automatically at 95% completion so continue watching stays relevant
 - Mini player activates when the video player scrolls out of view — keeps video playing while browsing related content
+- All three DB-touching files (`seed.js`, `routes/videos.js`, `routes/search.js`) read `DB_PATH` from the environment with a local fallback — ensures they all open the same file in both dev and production
 
 ---
 
