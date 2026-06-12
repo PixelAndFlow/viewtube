@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Database = require('better-sqlite3');
-const path = require('path');
+const { getDb } = require('../db/database');
 
-const db = new Database(path.join(__dirname, '../db/viewtube.db'));
+const db = getDb();
 
 router.get('/', (req, res) => {
   try {

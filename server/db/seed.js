@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
-const path = require('path');
+const dbPath = require('./dbPath');
 
-const db = new Database(path.join(__dirname, 'viewtube.db'));
+const db = new Database(dbPath);
 
 db.exec('DROP TABLE IF EXISTS videos;');
 

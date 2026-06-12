@@ -4,9 +4,13 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.join(__dirname, 'db/viewtube.db');
+const { dbPath } = require('./db/database');
 
 function ensureDatabase() {
+  if (isProd) {
+    require('./db/seed');
+    return;
+  }
   if (!fs.existsSync(dbPath)) {
     require('./db/seed');
     return;
@@ -22,6 +26,7 @@ function ensureDatabase() {
   }
 }
 
+const isProd = process.env.NODE_ENV === 'production';
 ensureDatabase();
 
 const videosRouter = require('./routes/videos');
@@ -29,7 +34,6 @@ const searchRouter = require('./routes/search');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const isProd = process.env.NODE_ENV === 'production';
 const clientDist = path.join(__dirname, '../client/dist');
 
 app.use(cors({
