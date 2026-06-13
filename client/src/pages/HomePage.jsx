@@ -2,11 +2,23 @@ import { useState, useEffect } from 'react';
 import VideoCard from '../components/VideoCard';
 import RecentlyWatched from '../components/RecentlyWatched';
 import ContinueWatching from '../components/ContinueWatching';
-import { getRecentlyWatched } from '../utils/recentlyWatched';
+import { getWatchHistory } from '../utils/watchHistory';
 
 const CHANNELS = ['VEVO Music', 'Retro Hits', 'Pop Legends', 'Rock Classics', 'Urban Beats', 'TED Talks', 'Science & Space', 'Tech Today', 'World Kitchen'];
 
 const CATEGORIES = ['Music', 'Sports', 'News', 'Gaming', 'Education'];
+
+const CHANNEL_CATEGORY = {
+  'VEVO Music': 'Music',
+  'Retro Hits': 'Music',
+  'Pop Legends': 'Music',
+  'Rock Classics': 'Sports',
+  'Urban Beats': 'Music',
+  'TED Talks': 'Education',
+  'Science & Space': 'News',
+  'Tech Today': 'Gaming',
+  'World Kitchen': 'Education',
+};
 
 const QUICK_FILTERS = [
   { id: 'watched', label: 'Watched' },
@@ -18,6 +30,14 @@ const SORT_OPTIONS = [
   { value: 'views', label: 'Most Viewed' },
   { value: 'az', label: 'A–Z' },
 ];
+
+function getVideoCategory(video) {
+  return video.category || CHANNEL_CATEGORY[video.channel_name];
+}
+
+function getWatchedIds() {
+  return new Set(getWatchHistory().map((entry) => Number(entry.videoId)));
+}
 
 function sortVideos(list, sortOption) {
   const sorted = [...list];
@@ -32,6 +52,28 @@ function sortVideos(list, sortOption) {
   }
 }
 
+function filterVideos(videos, { activeChannel, activeCategory, activeQuickFilter }) {
+  let filtered = videos;
+
+  if (activeCategory) {
+    filtered = filtered.filter((v) => getVideoCategory(v) === activeCategory);
+  }
+
+  if (activeChannel) {
+    filtered = filtered.filter((v) => v.channel_name === activeChannel);
+  }
+
+  if (activeQuickFilter === 'watched') {
+    const watchedIds = getWatchedIds();
+    filtered = filtered.filter((v) => watchedIds.has(Number(v.id)));
+  } else if (activeQuickFilter === 'new-to-you') {
+    const watchedIds = getWatchedIds();
+    filtered = filtered.filter((v) => !watchedIds.has(Number(v.id)));
+  }
+
+  return filtered;
+}
+
 export default function HomePage() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +82,7 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeQuickFilter, setActiveQuickFilter] = useState(null);
   const [sortOption, setSortOption] = useState('recent');
+  const [historyVersion, setHistoryVersion] = useState(0);
 
   useEffect(() => {
     fetch('/api/videos')
@@ -48,32 +91,47 @@ export default function HomePage() {
       .catch(() => { setError('Could not load videos. Is the server running on port 3001?'); setLoading(false); });
   }, []);
 
+  useEffect(() => {
+    const refreshHistory = () => setHistoryVersion((v) => v + 1);
+    window.addEventListener('viewtube-history-update', refreshHistory);
+    window.addEventListener('storage', refreshHistory);
+    return () => {
+      window.removeEventListener('viewtube-history-update', refreshHistory);
+      window.removeEventListener('storage', refreshHistory);
+    };
+  }, []);
+
   if (loading) return <main className="main-content"><p className="status-message">Loading...</p></main>;
   if (error)   return <main className="main-content"><p className="status-message error">{error}</p></main>;
 
-  let filtered = videos;
-  if (activeCategory) {
-    filtered = filtered.filter((v) => v.category === activeCategory);
-  } else if (activeQuickFilter === 'watched') {
-    const watchedIds = getRecentlyWatched();
-    filtered = filtered.filter((v) => watchedIds.includes(v.id));
-  } else if (activeQuickFilter === 'new-to-you') {
-    const watchedIds = getRecentlyWatched();
-    filtered = filtered.filter((v) => !watchedIds.includes(v.id));
-  }
-  if (activeChannel) {
-    filtered = filtered.filter((v) => v.channel_name === activeChannel);
-  }
+  let filtered = filterVideos(videos, { activeChannel, activeCategory, activeQuickFilter });
   const displayed = sortVideos(filtered, sortOption);
+  const hasActiveFilters = Boolean(activeChannel || activeCategory || activeQuickFilter);
 
   const handleCategoryClick = (cat) => {
-    setActiveQuickFilter(null);
-    setActiveCategory(activeCategory === cat ? null : cat);
+    const nextCategory = activeCategory === cat ? null : cat;
+    setActiveCategory(nextCategory);
+    if (nextCategory && activeChannel && CHANNEL_CATEGORY[activeChannel] !== nextCategory) {
+      setActiveChannel(null);
+    }
   };
 
   const handleQuickFilterClick = (id) => {
-    setActiveCategory(null);
     setActiveQuickFilter(activeQuickFilter === id ? null : id);
+  };
+
+  const handleChannelClick = (channel) => {
+    const nextChannel = activeChannel === channel ? null : channel;
+    setActiveChannel(nextChannel);
+    if (nextChannel && activeCategory && CHANNEL_CATEGORY[nextChannel] !== activeCategory) {
+      setActiveCategory(null);
+    }
+  };
+
+  const clearAllFilters = () => {
+    setActiveChannel(null);
+    setActiveCategory(null);
+    setActiveQuickFilter(null);
   };
 
   const handleSendFeedback = () => {
@@ -85,8 +143,8 @@ export default function HomePage() {
       <div className="homepage-toolbar">
         <div className="filter-chips">
           <button
-            className={`filter-chip${!activeChannel ? ' active' : ''}`}
-            onClick={() => setActiveChannel(null)}
+            className={`filter-chip${!hasActiveFilters ? ' active' : ''}`}
+            onClick={clearAllFilters}
           >
             All
           </button>
@@ -94,7 +152,7 @@ export default function HomePage() {
             <button
               key={ch}
               className={`filter-chip${activeChannel === ch ? ' active' : ''}`}
-              onClick={() => setActiveChannel(activeChannel === ch ? null : ch)}
+              onClick={() => handleChannelClick(ch)}
             >
               {ch}
             </button>
@@ -138,11 +196,22 @@ export default function HomePage() {
           Send feedback
         </button>
       </div>
-      <ContinueWatching videos={videos} />
-      <RecentlyWatched videos={videos} />
-      <div className="video-grid">
-        {displayed.map(video => <VideoCard key={video.id} video={video} />)}
-      </div>
+      {!hasActiveFilters && <ContinueWatching videos={videos} />}
+      {!hasActiveFilters && <RecentlyWatched videos={videos} key={historyVersion} />}
+      {displayed.length === 0 ? (
+        <p className="status-message">
+          No videos match your filters.
+          {activeQuickFilter === 'watched' && ' Watch a few videos first, then try again.'}
+          {' '}
+          <button type="button" className="page-action-btn" onClick={clearAllFilters}>
+            Clear filters
+          </button>
+        </p>
+      ) : (
+        <div className="video-grid">
+          {displayed.map(video => <VideoCard key={video.id} video={video} />)}
+        </div>
+      )}
     </main>
   );
 }
