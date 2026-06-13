@@ -8,7 +8,6 @@ import WatchPage from './pages/WatchPage';
 import SearchResults from './pages/SearchResults';
 import StarredPage from './pages/StarredPage';
 import WatchHistoryPage from './pages/WatchHistoryPage';
-import TrendingPage from './pages/TrendingPage';
 import './App.css';
 
 export default function App() {
@@ -26,7 +25,6 @@ export default function App() {
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/starred" element={<StarredPage />} />
                 <Route path="/history" element={<WatchHistoryPage />} />
-                <Route path="/trending" element={<TrendingPage />} />
               </Routes>
             </div>
           </div>

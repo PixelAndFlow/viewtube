@@ -163,7 +163,6 @@ export default function NavBar() {
       </div>
 
       <div className="navbar-right">
-        <Link to="/trending" className="navbar-link">Trending</Link>
         <button
           className="nav-icon-btn nav-search-mobile-btn"
           onClick={() => setMobileSearchOpen(true)}
