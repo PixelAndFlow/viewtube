@@ -5,7 +5,7 @@ import RecentlyWatched from '../components/RecentlyWatched';
 import ContinueWatching from '../components/ContinueWatching';
 import { getWatchHistory } from '../utils/watchHistory';
 
-const CHANNELS = ['VEVO Music', 'Retro Hits', 'Pop Legends', 'Rock Classics', 'Urban Beats', 'TED Talks', 'Science & Space', 'Tech Today', 'World Kitchen'];
+const CHANNELS = ['VEVO Music', 'Retro Hits', 'Pop Legends', 'Rock Classics', 'Urban Beats', 'Sports Central', 'TED Talks', 'Learn Academy', 'Science & Space', 'Tech Today', 'World Kitchen'];
 
 const CATEGORIES = ['Music', 'Sports', 'News', 'Gaming', 'Education'];
 
@@ -13,9 +13,11 @@ const CHANNEL_CATEGORY = {
   'VEVO Music': 'Music',
   'Retro Hits': 'Music',
   'Pop Legends': 'Music',
-  'Rock Classics': 'Sports',
+  'Rock Classics': 'Music',
   'Urban Beats': 'Music',
+  'Sports Central': 'Sports',
   'TED Talks': 'Education',
+  'Learn Academy': 'Education',
   'Science & Space': 'News',
   'Tech Today': 'Gaming',
   'World Kitchen': 'Education',

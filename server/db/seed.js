@@ -23,9 +23,11 @@ const CHANNEL_CATEGORY = {
   'VEVO Music': 'Music',
   'Retro Hits': 'Music',
   'Pop Legends': 'Music',
-  'Rock Classics': 'Sports',
+  'Rock Classics': 'Music',
   'Urban Beats': 'Music',
+  'Sports Central': 'Sports',
   'TED Talks': 'Education',
+  'Learn Academy': 'Education',
   'Science & Space': 'News',
   'Tech Today': 'Gaming',
   'World Kitchen': 'Education',
@@ -93,6 +95,28 @@ const rawVideos = [
   { title: 'Inside the Mind of a Master Procrastinator', channel_name: 'TED Talks', upload_date: '2026-02-24', video_url: 'arj7oStGLkU', view_count: 58000000, duration: '14:04' },
   { title: 'Your Body Language May Shape Who You Are', channel_name: 'TED Talks', upload_date: '2026-03-10', video_url: 'Ks-_Mh1QhMc', view_count: 67000000, duration: '21:02' },
   { title: 'The Puzzle of Motivation', channel_name: 'TED Talks', upload_date: '2026-03-28', video_url: 'rrkrvAUbU9Y', view_count: 35000000, duration: '18:36' },
+  { title: 'How to Speak So That People Want to Listen', channel_name: 'TED Talks', upload_date: '2026-04-05', video_url: 'eIho2S0ZahI', view_count: 48000000, duration: '9:58' },
+  { title: 'The Happy Secret to Better Work', channel_name: 'TED Talks', upload_date: '2026-04-18', video_url: 'fLJsdqxnSr0', view_count: 28000000, duration: '12:20' },
+  { title: 'The Danger of a Single Story', channel_name: 'TED Talks', upload_date: '2026-05-01', video_url: 'D9Ihs241zeg', view_count: 31000000, duration: '18:49' },
+  { title: '10 Ways to Have a Better Conversation', channel_name: 'TED Talks', upload_date: '2026-05-14', video_url: 'R1vXuFi2G1Q', view_count: 22000000, duration: '11:44' },
+
+  // ── Sports Central ─────────────────────────────────────────────
+  { title: 'Usain Bolt 100m World Record (9.58s)', channel_name: 'Sports Central', upload_date: '2026-01-10', video_url: '3nbjhpcZ9_g', view_count: 89000000, duration: '1:30' },
+  { title: 'Ronaldo Overhead Kick vs Juventus', channel_name: 'Sports Central', upload_date: '2026-01-22', video_url: '0pZzJBT894g', view_count: 120000000, duration: '2:15' },
+  { title: 'Michael Jordan - The Last Dance Highlights', channel_name: 'Sports Central', upload_date: '2026-02-05', video_url: 'E7eLP553K8A', view_count: 45000000, duration: '3:42' },
+  { title: 'Messi vs Real Madrid (El Clasico Hat Trick)', channel_name: 'Sports Central', upload_date: '2026-02-18', video_url: 'c9OjKDQF92M', view_count: 67000000, duration: '4:08' },
+  { title: 'Muhammad Ali - Float Like a Butterfly', channel_name: 'Sports Central', upload_date: '2026-03-02', video_url: 'a8QcblbT2QA', view_count: 34000000, duration: '3:55' },
+  { title: 'NBA Top 10 Plays of the Week', channel_name: 'Sports Central', upload_date: '2026-03-15', video_url: '6HGB4Z8S_38', view_count: 18000000, duration: '12:04' },
+  { title: 'FIFA World Cup - Best Goals Compilation', channel_name: 'Sports Central', upload_date: '2026-04-01', video_url: 'j0bEZ8U83D8', view_count: 95000000, duration: '10:22' },
+  { title: 'Federer vs Nadal - Wimbledon Epic Rally', channel_name: 'Sports Central', upload_date: '2026-04-20', video_url: '8X2k_ifr67A', view_count: 52000000, duration: '5:18' },
+
+  // ── Learn Academy ──────────────────────────────────────────────
+  { title: 'Welcome to Crash Course Biology', channel_name: 'Learn Academy', upload_date: '2026-01-16', video_url: 'QLpCQ8I7MQo', view_count: 14000000, duration: '15:01' },
+  { title: 'Introduction to Cells', channel_name: 'Learn Academy', upload_date: '2026-02-01', video_url: 'Hmwvj9lnNIE', view_count: 8200000, duration: '8:42' },
+  { title: 'The Agricultural Revolution: Crash Course World History', channel_name: 'Learn Academy', upload_date: '2026-02-14', video_url: '6D38RFSJVhc', view_count: 11000000, duration: '11:11' },
+  { title: 'Algebra Basics: What Is Algebra?', channel_name: 'Learn Academy', upload_date: '2026-03-01', video_url: 'NybHckSEQBI', view_count: 5600000, duration: '7:56' },
+  { title: 'Photosynthesis', channel_name: 'Learn Academy', upload_date: '2026-03-18', video_url: 'q0fGBox2s48', view_count: 4300000, duration: '13:05' },
+  { title: 'What Is Philosophy? - Crash Course Philosophy', channel_name: 'Learn Academy', upload_date: '2026-04-02', video_url: '1A2b4RkK8Gc', view_count: 7800000, duration: '10:04' },
 
   // ── Science & Space ──────────────────────────────────────────
   { title: 'James Webb Telescope: First Images (Official Broadcast)', channel_name: 'Science & Space', upload_date: '2026-01-08', video_url: 'nmMRMIE3MGw', view_count: 2100000, duration: '1:52:13' },
@@ -137,5 +161,5 @@ const insertAll = db.transaction((rows) => {
 
 insertAll(videos);
 
-console.log(`Seeded ${videos.length} videos across 9 channels.`);
+console.log(`Seeded ${videos.length} videos across 11 channels.`);
 db.close();
