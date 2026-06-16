@@ -62,6 +62,7 @@ body {
   padding: 0 16px 0 12px;
   z-index: 200;
   gap: 8px;
+  overflow: visible;
 }
 
 .navbar-left {
@@ -127,6 +128,7 @@ body {
   flex: 1;
   max-width: 600px;
   position: relative;
+  overflow: visible;
 }
 
 .navbar-search-wrap .navbar-search-form {
@@ -150,19 +152,30 @@ body {
 
 .search-suggestions {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 8px);
   left: 0;
   right: 64px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
   list-style: none;
   margin: 0;
-  padding: 8px 0;
-  z-index: 200;
+  padding: 6px;
+  z-index: 1000;
   max-height: 360px;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+[data-theme="dark"] .search-suggestions {
+  background: #212121;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .search-suggestion-item {
@@ -170,28 +183,44 @@ body {
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  padding: 10px 16px;
+  padding: 10px 12px;
   border: none;
+  border-radius: 8px;
   background: transparent;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  transition: background-color 0.15s ease;
 }
 
 .search-suggestion-item:hover {
-  background: var(--surface-hover);
+  background: #f3f4f6;
+}
+
+[data-theme="dark"] .search-suggestion-item:hover {
+  background: #2f2f2f;
 }
 
 .search-suggestion-title {
   font-size: 14px;
-  color: var(--text-primary);
+  color: #0f0f0f;
   font-weight: 500;
+  line-height: 1.3;
+}
+
+[data-theme="dark"] .search-suggestion-title {
+  color: var(--text-primary);
 }
 
 .search-suggestion-channel {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #606060;
   margin-top: 2px;
+  line-height: 1.3;
+}
+
+[data-theme="dark"] .search-suggestion-channel {
+  color: var(--text-secondary);
 }
 
 .navbar-search-input {
@@ -977,10 +1006,23 @@ body {
   padding: 0 4px;
   gap: 4px;
   z-index: 10;
+  overflow: visible;
 }
 
 .mobile-search-overlay.open {
   display: flex;
+}
+
+.mobile-search-field {
+  flex: 1;
+  position: relative;
+  overflow: visible;
+}
+
+.mobile-search-field .search-suggestions {
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
 }
 
 .mobile-search-form {
@@ -1063,7 +1105,7 @@ body {
   }
 
   /* Hide desktop search bar; show icon */
-  .navbar-search-form {
+  .navbar-search-wrap {
     display: none;
   }
 

@@ -32,15 +32,34 @@ const MoonIcon = () => (
   </svg>
 );
 
+function SuggestionsDropdown({ suggestions, onSelect }) {
+  return (
+    <ul className="search-suggestions">
+      {suggestions.map((video) => (
+        <li key={video.id}>
+          <button
+            type="button"
+            className="search-suggestion-item"
+            onClick={() => onSelect(video.title)}
+          >
+            <span className="search-suggestion-title">{video.title}</span>
+            <span className="search-suggestion-channel">{video.channel_name}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function NavBar() {
-  const [query, setQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [allVideos, setAllVideos] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
   const { dark, toggleTheme } = useTheme();
   const mobileInputRef = useRef(null);
-  const searchWrapRef = useRef(null);
+  const suppressSuggestionsRef = useRef(false);
 
   useEffect(() => {
     fetch('/api/videos')
@@ -53,49 +72,62 @@ export default function NavBar() {
     if (mobileSearchOpen) mobileInputRef.current?.focus();
   }, [mobileSearchOpen]);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const updateSuggestions = (term, videos) => {
+    const trimmed = term.trim().toLowerCase();
+    if (!trimmed) {
+      setSuggestions([]);
+      return;
+    }
 
-  const trimmed = query.trim().toLowerCase();
-  const suggestions = trimmed
-    ? allVideos
-        .filter(
-          (v) =>
-            v.title.toLowerCase().includes(trimmed) ||
-            v.channel_name.toLowerCase().includes(trimmed)
-        )
-        .slice(0, 8)
-    : [];
+    const filtered = videos
+      .filter(
+        (v) =>
+          v.title.toLowerCase().includes(trimmed) ||
+          v.channel_name.toLowerCase().includes(trimmed)
+      )
+      .slice(0, 5);
+
+    setSuggestions(filtered);
+  };
+
+  useEffect(() => {
+    if (suppressSuggestionsRef.current) {
+      suppressSuggestionsRef.current = false;
+      return;
+    }
+    updateSuggestions(searchTerm, allVideos);
+  }, [searchTerm, allVideos]);
 
   const runSearch = (q) => {
     const text = q.trim();
     if (!text) return;
+    suppressSuggestionsRef.current = true;
+    setSuggestions([]);
     navigate(`/search?q=${encodeURIComponent(text)}`);
-    setShowSuggestions(false);
     setMobileSearchOpen(false);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    runSearch(query);
+    runSearch(searchTerm);
   };
 
   const handleSuggestionClick = (text) => {
-    setQuery(text);
-    runSearch(text);
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setSearchTerm(trimmed);
+    runSearch(trimmed);
   };
 
-  const handleQueryChange = (value) => {
-    setQuery(value);
-    setShowSuggestions(value.trim().length > 0);
-  };
+  const isDropdownVisible =
+    searchTerm.trim().length > 0 && suggestions.length > 0;
+
+  const suggestionsList = isDropdownVisible ? (
+    <SuggestionsDropdown
+      suggestions={suggestions}
+      onSelect={handleSuggestionClick}
+    />
+  ) : null;
 
   return (
     <header className="navbar">
@@ -108,16 +140,19 @@ export default function NavBar() {
         >
           <ArrowBackIcon />
         </button>
-        <form className="mobile-search-form" onSubmit={handleSearch}>
-          <input
-            ref={mobileInputRef}
-            className="mobile-search-input"
-            type="text"
-            placeholder="Search"
-            value={query}
-            onChange={(e) => handleQueryChange(e.target.value)}
-          />
-        </form>
+        <div className="mobile-search-field">
+          <form className="mobile-search-form" onSubmit={handleSearch}>
+            <input
+              ref={mobileInputRef}
+              className="mobile-search-input"
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </form>
+          {mobileSearchOpen && suggestionsList}
+        </div>
       </div>
 
       <div className="navbar-left">
@@ -130,36 +165,20 @@ export default function NavBar() {
         </Link>
       </div>
 
-      <div className="navbar-search-wrap" ref={searchWrapRef}>
+      <div className="navbar-search-wrap">
         <form className="navbar-search-form" onSubmit={handleSearch}>
           <input
             className="navbar-search-input"
             type="text"
             placeholder="Search"
-            value={query}
-            onChange={(e) => handleQueryChange(e.target.value)}
-            onFocus={() => trimmed && setShowSuggestions(true)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <button type="submit" className="navbar-search-btn" aria-label="Search">
             <SearchIcon />
           </button>
         </form>
-        {showSuggestions && suggestions.length > 0 && (
-          <ul className="search-suggestions">
-            {suggestions.map((v) => (
-              <li key={v.id}>
-                <button
-                  type="button"
-                  className="search-suggestion-item"
-                  onClick={() => handleSuggestionClick(v.title)}
-                >
-                  <span className="search-suggestion-title">{v.title}</span>
-                  <span className="search-suggestion-channel">{v.channel_name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        {suggestionsList}
       </div>
 
       <div className="navbar-right">
