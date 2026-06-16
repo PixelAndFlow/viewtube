@@ -104,10 +104,9 @@ export default function VideoCard({ video, startTime, onCardClick }) {
         </div>
         <div className="video-card-meta-col">
           <p className="video-card-title">{video.title}</p>
-          <p className="video-card-views">{formatViewCount(video.view_count)}</p>
           <p className="video-card-channel">{video.channel_name}</p>
           <p className="video-card-stats">
-            {formatRelativeDate(video.upload_date)}
+            {formatViewCount(video.view_count)} · {formatRelativeDate(video.upload_date)}
           </p>
         </div>
       </div>

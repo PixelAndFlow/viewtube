@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import VideoCard from '../components/VideoCard';
+import { VideoGridSkeleton } from '../components/VideoCardSkeleton';
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
@@ -30,7 +31,7 @@ export default function SearchResults() {
           Search results for <strong>"{q}"</strong>
         </p>
       )}
-      {loading && <p className="status-message">Searching...</p>}
+      {loading && <VideoGridSkeleton count={8} />}
       {!loading && q && videos.length === 0 && (
         <div className="empty-state">
           <h2>No results found for "{q}"</h2>

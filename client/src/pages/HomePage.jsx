@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import VideoCard from '../components/VideoCard';
+import { VideoGridSkeleton } from '../components/VideoCardSkeleton';
 import RecentlyWatched from '../components/RecentlyWatched';
 import ContinueWatching from '../components/ContinueWatching';
 import { getWatchHistory } from '../utils/watchHistory';
@@ -101,7 +102,20 @@ export default function HomePage() {
     };
   }, []);
 
-  if (loading) return <main className="main-content"><p className="status-message">Loading...</p></main>;
+  if (loading) {
+    return (
+      <main className="main-content">
+        <div className="homepage-toolbar">
+          <div className="filter-chips skeleton-filter-row">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="skeleton-block skeleton-chip" />
+            ))}
+          </div>
+        </div>
+        <VideoGridSkeleton count={12} />
+      </main>
+    );
+  }
   if (error)   return <main className="main-content"><p className="status-message error">{error}</p></main>;
 
   let filtered = filterVideos(videos, { activeChannel, activeCategory, activeQuickFilter });
