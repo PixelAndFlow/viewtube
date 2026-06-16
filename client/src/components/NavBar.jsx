@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const MenuIcon = () => (
@@ -57,6 +57,7 @@ export default function NavBar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [allVideos, setAllVideos] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
   const { dark, toggleTheme } = useTheme();
   const mobileInputRef = useRef(null);
   const suppressSuggestionsRef = useRef(false);
@@ -129,6 +130,9 @@ export default function NavBar() {
     />
   ) : null;
 
+  const isSearchActive =
+    location.pathname.startsWith('/search') || mobileSearchOpen;
+
   return (
     <header className="navbar">
       <div className={`mobile-search-overlay${mobileSearchOpen ? ' open' : ''}`}>
@@ -159,13 +163,17 @@ export default function NavBar() {
         <button className="nav-icon-btn" aria-label="Menu">
           <MenuIcon />
         </button>
-        <Link to="/" className="navbar-logo">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `navbar-logo${isActive ? ' active' : ''}`}
+        >
           <span className="logo-icon-wrap">▶</span>
           <span className="logo-wordmark">ViewTube</span>
-        </Link>
+        </NavLink>
       </div>
 
-      <div className="navbar-search-wrap">
+      <div className={`navbar-search-wrap${isSearchActive ? ' is-active' : ''}`}>
         <form className="navbar-search-form" onSubmit={handleSearch}>
           <input
             className="navbar-search-input"
@@ -182,22 +190,25 @@ export default function NavBar() {
       </div>
 
       <div className="navbar-right">
-        <button
-          className="nav-icon-btn nav-search-mobile-btn"
-          onClick={() => setMobileSearchOpen(true)}
-          aria-label="Search"
-        >
-          <SearchIcon />
-        </button>
-        <button
-          className="nav-icon-btn"
-          onClick={toggleTheme}
-          aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-          title={dark ? 'Light mode' : 'Dark mode'}
-        >
-          {dark ? <SunIcon /> : <MoonIcon />}
-        </button>
-        <div className="nav-avatar" title="ViewTube User">V</div>
+        <div className="navbar-actions">
+          <button
+            className={`nav-icon-btn nav-search-mobile-btn${isSearchActive ? ' active' : ''}`}
+            onClick={() => setMobileSearchOpen(true)}
+            aria-label="Search"
+            aria-current={isSearchActive ? 'page' : undefined}
+          >
+            <SearchIcon />
+          </button>
+          <button
+            className="nav-icon-btn"
+            onClick={toggleTheme}
+            aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={dark ? 'Light mode' : 'Dark mode'}
+          >
+            {dark ? <SunIcon /> : <MoonIcon />}
+          </button>
+          <div className="nav-avatar" title="ViewTube User">V</div>
+        </div>
       </div>
     </header>
   );
